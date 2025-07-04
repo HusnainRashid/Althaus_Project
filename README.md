@@ -1,0 +1,1 @@
+This project has been focused on working on a project from scratch. We have learned how to work with Git and GitHub and have succesffully worked together to create a working program that we have tested manually and are happy to present. We hope to be able to continue improving and hope to be able to provide a fully automatic tested project sometime in the future.
