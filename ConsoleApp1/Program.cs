@@ -55,6 +55,9 @@ class Program
             Console.WriteLine("Invalid amount.");
         }
 
+        // Add extra expenses
+        total += AddExtraExpenses();
+
         // Calculate and output
         decimal share = total / num;
         Console.WriteLine($"\nEqual share per person: £{share:F2}");
@@ -68,5 +71,37 @@ class Program
             Console.WriteLine($"{p.Name} owes £{share:F2}");
 
         Console.WriteLine("\nThanks for using FairSplit!");
+    }
+
+    static decimal AddExtraExpenses()
+    {
+        decimal extra = 0;
+        while (true)
+        {
+            Console.Write("Add extra expense? (y/n): ");
+            string input = Console.ReadLine().Trim().ToLower();
+            if (input == "y" || input == "yes")
+            {
+                Console.Write("Enter extra expense amount (£): ");
+                decimal amount;
+                if (decimal.TryParse(Console.ReadLine(), out amount) && amount > 0)
+                {
+                    extra += amount;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid amount.");
+                }
+            }
+            else if (input == "n" || input == "no")
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Please enter 'y' or 'n'.");
+            }
+        }
+        return extra;
     }
 }
