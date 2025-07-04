@@ -4,8 +4,8 @@ using System.Linq;
 
 class Person
 {
-    public string Name { get; set; }
-    public bool HasPaid { get; set; }
+    public string Name { get; set; }     // Person's name
+    public bool HasPaid { get; set; }    // true if this person already paid
 }
 
 class Program
@@ -14,58 +14,26 @@ class Program
     {
         Console.WriteLine("=== FairSplit ===\n");
 
-        var people = new List<Person>();
+        //  Ask for people and paid status
+        List<Person> people = GetPeopleList();
 
-        // Input: Get up to 10 people
-        int num;
-        while (true)
-        {
-            Console.Write("How many people? (1-10): ");
-            if (int.TryParse(Console.ReadLine(), out num) && num > 0 && num <= 10)
-                break;
-            Console.WriteLine("Invalid number.");
-        }
+        //  Base total amount
+        decimal baseTotal = GetAmount("Enter total expense (£): ");
 
-        for (int i = 0; i < num; i++)
-        {
-            Console.Write($"Name of person {i + 1}: ");
-            string name = Console.ReadLine();
+        //  Optional extras (adds to the total)
+        decimal extraTotal = GetExtraExpenses();
+        decimal grandTotal = baseTotal + extraTotal;
 
-            bool paid;
-            while (true)
-            {
-                Console.Write("Has this person paid? (y/n): ");
-                string input = Console.ReadLine().Trim().ToLower();
-                if (input == "y" || input == "yes") { paid = true; break; }
-                if (input == "n" || input == "no")  { paid = false; break; }
-                Console.WriteLine("Please enter 'y' or 'n'.");
-            }
+        //  Equal share for everyone
+        decimal share = grandTotal / people.Count;
+        Console.WriteLine($"\nEach person should pay: £{share:F2}\n");
 
-            people.Add(new Person { Name = name, HasPaid = paid });
-            Console.WriteLine();
-        }
-
-        // Input: Total amount
-        decimal total;
-        while (true)
-        {
-            Console.Write("Enter total expense (£): ");
-            if (decimal.TryParse(Console.ReadLine(), out total) && total > 0)
-                break;
-            Console.WriteLine("Invalid amount.");
-        }
-
-        // Add extra expenses
-        total += AddExtraExpenses();
-
-        // Calculate and output
-        decimal share = total / num;
-        Console.WriteLine($"\nEqual share per person: £{share:F2}");
-
-        Console.WriteLine("\n--- Paid ---");
+        //  Output paid list (owe nothing)
+        Console.WriteLine("--- Paid ---");
         foreach (var p in people.Where(p => p.HasPaid))
             Console.WriteLine($"{p.Name} has already paid.");
 
+        //  Output unpaid list (owe 'share')
         Console.WriteLine("\n--- Unpaid ---");
         foreach (var p in people.Where(p => !p.HasPaid))
             Console.WriteLine($"{p.Name} owes £{share:F2}");
@@ -73,35 +41,86 @@ class Program
         Console.WriteLine("\nThanks for using FairSplit!");
     }
 
-    static decimal AddExtraExpenses()
+    // ---------------- Helper: collect names & paid flag ----------------
+    static List<Person> GetPeopleList()
     {
-        decimal extra = 0;
+        var people = new List<Person>();
+
+        // limit 1‑10
+        int count;
+        while (true)
+        {
+            Console.Write("How many people? (1–10): ");
+            if (int.TryParse(Console.ReadLine(), out count) && count >= 1 && count <= 10)
+                break;
+            Console.WriteLine("Invalid number.");
+        }
+
+        // loop through each person
+        for (int i = 0; i < count; i++)
+        {
+            // name (non‑empty, no duplicates)
+            string name;
+            do
+            {
+                Console.Write($"Name of person {i + 1}: ");
+                name = Console.ReadLine().Trim();
+            } while (string.IsNullOrWhiteSpace(name) ||
+                     people.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+
+            // ask if they already paid
+            bool paid;
+            while (true)
+            {
+                Console.Write("Has this person paid? (y/n): ");
+                string ans = Console.ReadLine().Trim().ToLower();
+                if (ans is "y" or "yes") { paid = true;  break; }
+                if (ans is "n" or "no")  { paid = false; break; }
+                Console.WriteLine("Please enter 'y' or 'n'.");
+            }
+
+            people.Add(new Person { Name = name, HasPaid = paid });
+            Console.WriteLine();
+        }
+
+        return people;
+    }
+
+    // ---------------- Helper: read a positive decimal ------------------
+    static decimal GetAmount(string prompt)
+    {
+        decimal value;
+        while (true)
+        {
+            Console.Write(prompt);
+            if (decimal.TryParse(Console.ReadLine(), out value) && value > 0)
+                return value;
+            Console.WriteLine("Invalid amount.");
+        }
+    }
+
+    // ---------------- Helper: loop for extra expenses ------------------
+    static decimal GetExtraExpenses()
+    {
+        decimal extra = 0m;
+
         while (true)
         {
             Console.Write("Add extra expense? (y/n): ");
             string input = Console.ReadLine().Trim().ToLower();
-            if (input == "y" || input == "yes")
+
+            if (input is "y" or "yes")
             {
-                Console.Write("Enter extra expense amount (£): ");
-                decimal amount;
-                if (decimal.TryParse(Console.ReadLine(), out amount) && amount > 0)
-                {
-                    extra += amount;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid amount.");
-                }
+                extra += GetAmount("Enter extra expense amount (£): ");
             }
-            else if (input == "n" || input == "no")
+            else if (input is "n" or "no")
             {
-                break;
+                return extra; // done
             }
             else
             {
                 Console.WriteLine("Please enter 'y' or 'n'.");
             }
         }
-        return extra;
     }
 }
