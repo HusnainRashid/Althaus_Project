@@ -41,7 +41,7 @@ class Program
         Console.WriteLine("\nThanks for using FairSplit!");
     }
 
-    // ---------------- Helper: collect names & paid flag ----------------
+    // ---------------- collect names & paid flag ----------------
     static List<Person> GetPeopleList()
     {
         var people = new List<Person>();
@@ -50,7 +50,7 @@ class Program
         int count;
         while (true)
         {
-            Console.Write("How many people? (1–10): ");
+            Console.Write("How many people? (1-10): ");
             if (int.TryParse(Console.ReadLine(), out count) && count >= 1 && count <= 10)
                 break;
             Console.WriteLine("Invalid number.");
@@ -86,7 +86,7 @@ class Program
         return people;
     }
 
-    // ---------------- Helper: read a positive decimal ------------------
+    // ----------------  read a positive decimal ------------------
     static decimal GetAmount(string prompt)
     {
         decimal value;
@@ -99,7 +99,7 @@ class Program
         }
     }
 
-    // ---------------- Helper: loop for extra expenses ------------------
+    // ----------------  loop for extra expenses ------------------
     static decimal GetExtraExpenses()
     {
         decimal extra = 0m;
